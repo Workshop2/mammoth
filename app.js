@@ -41,6 +41,7 @@ passport.use(new SpotifyStrategy({
 // ROUTES
 var routes = require('./routes/index');
 var users = require('./routes/users');
+var results = require('./routes/results');
 
 var app = express();
 
@@ -61,7 +62,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/', routes);
-app.use('/users',ensureAuthenticated, users);
+// app.use('/users',ensureAuthenticated, users);
+app.use('/results', results);
 
 
 // GET /auth/spotify
@@ -89,7 +91,6 @@ app.get('/logout', function(req, res){
   req.logout();
   res.redirect('/');
 });
-
 
 
 
