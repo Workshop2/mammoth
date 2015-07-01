@@ -11,7 +11,7 @@ router.get('/', function(req, res, next) {
 		},
 		obj = {};
 
-	var query = "Daft%20Punk",
+	var query = req.query.query,
 		types = ["web","news","video","social","shopping"],
 		count = 10,
 		options = {};
