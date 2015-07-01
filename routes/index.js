@@ -3,7 +3,12 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+	var templateTags = {
+		title: 'Mammoth',
+		bodyclass: ' class=homepage'
+	};
+
+	res.render('index', templateTags);
 });
 
 module.exports = router;

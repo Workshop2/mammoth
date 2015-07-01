@@ -1,2 +1,30 @@
-<h1>{{title}}</h1>
-<p>Welcome to {{title}}</p>
+<nav>
+<!--  <ul class="left hide-on-med-and-down">
+	<li><a href="#!">First Sidebar Link</a></li>
+	<li><a href="#!">Second Sidebar Link</a></li>
+  </ul> -->
+  <ul id="slide-out" class="side-nav grey darken-4">
+	<li><a href="#!" class="white-text">First Sidebar Link</a></li>
+	<li><a href="#!" class="white-text">Second Sidebar Link</a></li>
+  </ul>
+  <a href="#" data-activates="slide-out" class="button-collapse show-on-large"><i class="mdi-navigation-menu"></i></a>
+</nav>
+<div class="container">
+
+	<div class="center-align hometext">
+		<h1 class="white-text">{{title}}</h1>
+		<h5 class="white-text">If you want to get ahead, get a {{title}}</h5>
+	</div>
+
+	<div class="row">
+		<form action="/results">
+			<div class="input-field col s10">
+				<i class="material-icons prefix white-text">search</i>
+				<input placeholder="Search&hellip;" id="query" name="query" type="search">
+				<!-- <label for="query">Search</label> -->
+			</div>
+			<div class="input-field col s2" style="padding-left:4rem"><button class="waves-effect waves-light btn-large grey darken-4">Search</button></div>
+		</form>
+	</div>
+
+</div>
