@@ -5,11 +5,18 @@ var request = require('request');
 var router = express.Router();
 var gravatar = require('gravatar');
 var SpotifyWebApi = require('spotify-web-api-node');
+var querystring = require("querystring");
 
 /* GET results */
 router.get('/', function(req, res, next) {
-	var types = ["web","news","videos","social","shopping"],
+	var types = ["news","videos","social","shopping"],
 			sortableTypes = ["news", "social", "videos"],
+			typeLimits = [
+				{ name: "news", limit: 20 },
+				{ name: "social", limit: 20 },
+				{ name: "shopping", limit: 20 },
+				{ name: "videos", limit: 4 }
+			],
 			numberOfArtists = 5,
 			templateTags = {
 				title: 'Mmth_Music results',
@@ -66,8 +73,6 @@ router.get('/', function(req, res, next) {
 							for (var i = 0; i < currentResults.length; i++) {
 								var result = currentResults[i];
 								templateTags.results[type].push(result);
-								console.log("Pusing result onto " + type);
-								console.log(result);
 							}
 						}
 
@@ -101,6 +106,27 @@ router.get('/', function(req, res, next) {
 				if(templateTags.results[type]) {
 					templateTags.results[type] = templateTags.results[type].sort(function(a, b){ return b.date - a.date;})
 				}
+			}
+
+			callback(null);
+		},
+
+		// Strip unwanted content
+		function(callback) {
+			console.log("Stripping unwanted content...");
+
+			for (var i = 0; i < typeLimits.length; i++) {
+				var type = typeLimits[i];
+
+				console.log("For type " + type.name);
+
+				var elements = templateTags.results[type.name];
+
+				console.log("Before: " + elements.length);
+				if(elements) {
+					elements.splice(Math.min(elements.length, type.limit), Number.MAX_VALUE);
+				}
+				console.log("After: " + templateTags.results[type.name].length);
 			}
 
 			callback(null);
@@ -145,20 +171,32 @@ function performSearchForTerm(searchTerm, types, megaCallback) {
 			result = {};
 
 		async.each(types, function(type, cb) {
-			var options = {};
-			if(type=="videos")options.url = 'https://api.qwant.com/api/search/' + type + '?count=' + "4" + "&f=source%3Ayoutube" + '&locale=en_gb&offset=10&q=' + searchTerm;
-			else options.url = 'https://api.qwant.com/api/search/' + type + '?count=' + count + '&locale=en_gb&offset=10&q=' + searchTerm;
+			var urlOptions = {
+				count: count,
+				locale: "en_gb",
+				q: searchTerm
+			};
+
+			if(type == "videos") {
+				urlOptions.count = 4;
+				urlOptions.f = "source-youtube";
+			}
+
+			var options = {
+				url: 'https://api.qwant.com/api/search/' + type + '?' + querystring.stringify(urlOptions)
+			};
 
 			result[type] = []; // we are always exprected to return each type
 			request(options, function (error, response, body) {
+				console.log("URL: " + options.url);
 				var mammoth = JSON.parse(body);
 				console.log("-- Calling QWANT " + searchTerm + " " + type);
 				if (!error && response.statusCode == 200 && typeof mammoth.data!=="undefined") {
 					result[type] = mammoth.data.result.items;
 				}
-				console.log("-- Called QWANT " + searchTerm + " " + type);
+				//console.log("-- Called QWANT " + searchTerm + " " + type);
 
-				console.log("-- Moving on " + searchTerm + " " + type);
+				//console.log("-- Moving on " + searchTerm + " " + type);
 				cb(null);
 			});
 		},
@@ -170,7 +208,7 @@ function performSearchForTerm(searchTerm, types, megaCallback) {
 				// All processing will now stop.
 				console.log('[performSearchForTerm] A request failed to process\n' + err);
 			} else {
-				console.log("----- DONE " + searchTerm);
+				//console.log("----- DONE " + searchTerm);
 				//console.log(result);
 				megaCallback(result);
 			}
@@ -215,7 +253,7 @@ function fetchTermsForUser(user, megaCallback) {
                     }
                 }
 
-								console.log("currentIteration" + currentIteration + "totalIterations" + totalIterations)
+								console.log("currentIteration: " + currentIteration + " | totalIterations: " + totalIterations)
 								finished = currentIteration >= totalIterations;
 								currentIteration++;
 		        		callback();
@@ -230,7 +268,7 @@ function fetchTermsForUser(user, megaCallback) {
 			}
 			else {
 				console.log(totals);
-				console.log("Yay, search complete. Passing onto megaCallback");
+				//console.log("Yay, search complete. Passing onto megaCallback");
 				megaCallback(null, totals);
 			}
 		});
