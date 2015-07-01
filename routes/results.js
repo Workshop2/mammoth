@@ -15,7 +15,7 @@ router.get('/', function(req, res, next) {
 
 	// init with blank arrays
 	for(var i = 0; i < types.length; i++) {
-		templateTags.results = [];
+		templateTags.results[types[i]] = [];
 	}
 
 	async.waterfall([
@@ -30,36 +30,51 @@ router.get('/', function(req, res, next) {
 			searchTerms = query ? [query] : searchTerms;
 
 			// Now loop all of the terms and do a search under each "search type" e.g. news
-			async.each(
-				searchTerms,
-				function(searchTerm, cb) {
-					console.log("Performing search for " + searchTerm);
-					performSearchForTerm(searchTerm, types, function(searchResults) {
-						console.log("Got some results for " + searchTerm);
+			async.each(searchTerms, function(searchTerm, cb) {
 
-						// with the given result, now collate into one large results obj
-						for(var typeI = 0; typeI < types.length; typeI++) {
-							var type = types[typeI];
-							var currentResults = searchResults[type]; // array of result for type e.g. news
+								console.log("Performing search for " + searchTerm);
+								performSearchForTerm(searchTerm, types, function(searchResults) {
+									console.log("Got some results for " + searchTerm);
+									//console.log(searchResults);
 
-							console.log("Building mega results for  " + type);
-							// loop round all results and push them onto the big results stack
-							// keeping the grouping
-							for (var i = 0; i < currentResults.length; i++) {
-								var result = currentResults[i];
-								templateTags.results[type].push(result);
-								console.log("Pusing result onto " + type + "\n" + result);
-							}
-						}
+									// with the given result, now collate into one large results obj
+									for(var typeI = 0; typeI < types.length; typeI++) {
+										var type = types[typeI];
+										console.log(searchResults);
+										var currentResults = searchResults[type]; // array of result for type e.g. news
 
-						cb();
-					});
-				},
-				callback);
+										console.log("Building mega results for  " + type);
+										// loop round all results and push them onto the big results stack
+										// keeping the grouping
+										for (var i = 0; i < currentResults.length; i++) {
+											var result = currentResults[i];
+											templateTags.results[type].push(result);
+											console.log("Pusing result onto " + type + "\n" + result);
+										}
+									}
+
+									console.log("Moving onto next search term");
+									cb(null);
+								});
+
+			},
+			function(err) {
+				console.log("Finished looping each search term")
+
+				if(err) {
+					console.log("FFS")
+				}
+				else {
+					console.log("So fucking close now...")
+					callback(null); //TODO: We need some more async
+				}
+			});
+
 		},
 		function(callback) {
 				console.log("YAY - we made it to the end");
-				console.log("Rendering " + templateTags);
+				console.log("Rendering ");
+				//console.log(templateTags);
 				// finish by writing the response out
 				res.render('results', templateTags);
 		}
@@ -109,23 +124,30 @@ function performSearchForTerm(searchTerm, types, megaCallback) {
 				url: 'https://api.qwant.com/api/search/' + type + '?count=' + count + '&locale=en_gb&offset=10&q=' + searchTerm
 			};
 
+			result[type] = []; // we are always exprected to return each type
 			request(options, function (error, response, body) {
+				console.log("-- Calling QWANT " + searchTerm + " " + type);
 				if (!error && response.statusCode == 200) {
 					var mammoth = JSON.parse(body);
 					result[type] = mammoth.data.result.items;
 				}
-				cb();
-			});
+				console.log("-- Called QWANT " + searchTerm + " " + type);
 
+				console.log("-- Moving on " + searchTerm + " " + type);
+				cb(null);
+			});
 		},
 		function(err){
+			console.log("--- Finishing searches " + searchTerm);
 			// if any of the processing produced an error, err would equal that error
 			if(err) {
 				// One of the iterations produced an error.
 				// All processing will now stop.
 				console.log('[performSearchForTerm] A request failed to process\n' + err);
 			} else {
-				megaCallback(null, result);
+				console.log("----- DONE " + searchTerm);
+				console.log(result);
+				megaCallback(result);
 			}
 		});
 }
