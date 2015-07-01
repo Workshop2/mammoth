@@ -1,6 +1,7 @@
 module.exports = {
 	spotify: {
-		clientID: "<key>",
-        secret: "<key>"
+			clientID: "<key>",
+      secret: "<key>",
+			callbackUrl: "<key>"
     }
 }

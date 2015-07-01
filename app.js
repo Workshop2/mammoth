@@ -25,7 +25,7 @@ console.log("Spotify Secret: " + config.spotify.secret);
 passport.use(new SpotifyStrategy({
     clientID: config.spotify.clientID,
     clientSecret: config.spotify.secret,
-    callbackURL: 'http://localhost:3000/callback'
+    callbackURL: config.host + config.spotify.callbackUrl
   },
   function(accessToken, refreshToken, profile, done) {
     profile.accessToken = accessToken;

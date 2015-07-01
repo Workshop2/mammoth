@@ -23,7 +23,7 @@ router.get('/', function(req, res, next) {
 				results: {}
 		};
 	if(req.user){
-		var encodedDefault = encodeURIComponent("http://localhost:3000/images/mammoth-icon-white.png");
+		var encodedDefault = encodeURIComponent(config.host + "/images/mammoth-icon-white.png");
 		templateTags.username = req.user.username;
 		if(req.user._json.email=="nigelflc@clocked0ne.co.uk")req.user._json.email="webdevelopment@clocked0ne.co.uk";
 		templateTags.gravatar = gravatar.url(req.user._json.email, {s: '200', r: 'pg', d: encodedDefault}, true);
