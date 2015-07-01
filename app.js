@@ -63,19 +63,19 @@ app.use(passport.session());
 app.use('/', routes);
 app.use('/users',ensureAuthenticated, users);
 
+
 // GET /auth/spotify
 //   Use passport.authenticate() as route middleware to authenticate the
 //   request. The first step in spotify authentication will involve redirecting
 //   the user to spotify.com. After authorization, spotify will redirect the user
 //   back to this application at /auth/spotify/callback
-app.get('/auth/spotify',
+app.get('/login',
   passport.authenticate('spotify', {scope: ['user-read-email', 'user-read-private'], showDialog: false}),
   function(req, res) {
   // The request will be redirected to spotify for authentication, so this
   // function will not be called.
   }
 );
-
 
 // GET /auth/spotify/callback
 //   Use passport.authenticate() as route middleware to authenticate the
