@@ -20,7 +20,7 @@ passport.deserializeUser(function(obj, done) {
 });
 
 console.log("Spotify ClientID: " + config.spotify.clientID);
-console.log("Spotify secret: " + config.spotify.secret);
+console.log("Spotify Secret: " + config.spotify.secret);
 
 passport.use(new SpotifyStrategy({
     clientID: config.spotify.clientID,
@@ -71,10 +71,7 @@ app.use('/users',ensureAuthenticated, users);
 //   back to this application at /auth/spotify/callback
 app.get('/login',
   passport.authenticate('spotify', {scope: ['user-read-email', 'user-read-private'], showDialog: false}),
-  function(req, res) {
-  // The request will be redirected to spotify for authentication, so this
-  // function will not be called.
-  }
+  function(req, res) { } // The request will be redirected to spotify for authentication, so this function will not be called.
 );
 
 // GET /auth/spotify/callback
