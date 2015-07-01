@@ -13,6 +13,7 @@
     "express-session": "^1.11.3",
     "hbs": "~2.9.0",
     "morgan": "~1.5.3",
+    "passport": "^0.2.2",
     "passport-spotify": "^0.3.0",
     "serve-favicon": "~2.2.1",
     "spotify-web-api-node": "^2.0.2"

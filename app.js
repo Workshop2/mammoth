@@ -4,10 +4,43 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var session = require('express-session');
+var passport = require('passport');
+var SpotifyStrategy  = require('passport-spotify').Strategy;
+var config = require('./config/config')
 
+// Spotify/Session stuff
+// from https://github.com/JMPerez/passport-spotify/blob/master/examples/login/app.js
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function(obj, done) {
+  done(null, obj);
+});
+
+console.log("Spotify ClientID: " + config.spotify.clientID);
+console.log("Spotify secret: " + config.spotify.secret);
+
+passport.use(new SpotifyStrategy({
+    clientID: config.spotify.clientID,
+    clientSecret: config.spotify.secret,
+    callbackURL: 'http://localhost:3000/callback'
+  },
+  function(accessToken, refreshToken, profile, done) {
+    process.nextTick(function () {
+      return done(null, profile);
+    });
+  })
+);
+
+
+
+
+
+// ROUTES
 var routes = require('./routes/index');
 var users = require('./routes/users');
-var spotify = require('./routes/spotify');
 
 var app = express();
 
@@ -23,9 +56,45 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(session({ secret: 'mammoth ftw' }));
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use('/', routes);
-app.use('/users', users);
-app.use('/spotify', spotify);
+app.use('/users',ensureAuthenticated, users);
+
+// GET /auth/spotify
+//   Use passport.authenticate() as route middleware to authenticate the
+//   request. The first step in spotify authentication will involve redirecting
+//   the user to spotify.com. After authorization, spotify will redirect the user
+//   back to this application at /auth/spotify/callback
+app.get('/auth/spotify',
+  passport.authenticate('spotify', {scope: ['user-read-email', 'user-read-private'], showDialog: false}),
+  function(req, res) {
+  // The request will be redirected to spotify for authentication, so this
+  // function will not be called.
+  }
+);
+
+
+// GET /auth/spotify/callback
+//   Use passport.authenticate() as route middleware to authenticate the
+//   request. If authentication fails, the user will be redirected back to the
+//   login page. Otherwise, the primary route function function will be called,
+//   which, in this example, will redirect the user to the home page.
+app.get('/callback',
+  passport.authenticate('spotify', { failureRedirect: '/failedToLogin' }),
+  function(req, res) {
+    res.redirect('/');
+  });
+
+app.get('/logout', function(req, res){
+  req.logout();
+  res.redirect('/');
+});
+
+
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -57,6 +126,16 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
+
+// Simple route middleware to ensure user is authenticated.
+//   Use this route middleware on any resource that needs to be protected.  If
+//   the request is authenticated (typically via a persistent login session),
+//   the request will proceed. Otherwise, the user will be redirected to the
+//   login page.
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) { return next(); }
+  res.redirect('/login');
+}
 
 
 module.exports = app;
