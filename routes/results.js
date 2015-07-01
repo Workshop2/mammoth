@@ -46,7 +46,7 @@ router.get('/', function(req, res, next) {
 									// with the given result, now collate into one large results obj
 									for(var typeI = 0; typeI < types.length; typeI++) {
 										var type = types[typeI];
-										console.log(searchResults);
+										//console.log(searchResults);
 										var currentResults = searchResults[type]; // array of result for type e.g. news
 
 										console.log("Building mega results for  " + type);
@@ -111,7 +111,7 @@ function detectMostPopularArtists(popularArtists, numberOfArtists) {
 	}
 
 	console.log("Detected winners:")
-	console.log(winners);
+	//console.log(winners);
 
 	var results = [];
 	for(var i = 0; i < winners.length; i++) {
@@ -121,7 +121,7 @@ function detectMostPopularArtists(popularArtists, numberOfArtists) {
 		}
 	}
 	console.log("Detected results:")
-	console.log(results);
+	//console.log(results);
 
 	return results;
 }
@@ -157,7 +157,7 @@ function performSearchForTerm(searchTerm, types, megaCallback) {
 				console.log('[performSearchForTerm] A request failed to process\n' + err);
 			} else {
 				console.log("----- DONE " + searchTerm);
-				console.log(result);
+				//console.log(result);
 				megaCallback(result);
 			}
 		});
