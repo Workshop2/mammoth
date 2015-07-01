@@ -8,6 +8,7 @@ var SpotifyWebApi = require('spotify-web-api-node');
 /* GET results */
 router.get('/', function(req, res, next) {
 	var types = ["web","news","video","social","shopping"],
+			numberOfArtists = 5,
 			templateTags = {
 				title: 'Mammoth results',
 				results: {}
@@ -24,6 +25,11 @@ router.get('/', function(req, res, next) {
 			// Perform the Spotify query for all valid terms
 			fetchTermsForUser(req.user, callback);
 		},
+			function(artists, callback) {
+				console.log("Detecting most popular artists...");
+				var popularArtists = detectMostPopularArtists(artists, numberOfArtists);
+				callback(null, popularArtists);
+			},
 		function(searchTerms, callback) {
 			console.log("Performing searches for Spotify Search Terms...");
 			var query = req.query.query;
@@ -79,44 +85,49 @@ router.get('/', function(req, res, next) {
 				res.render('results', templateTags);
 		}
 	]);
-
-
-	// TODO: Loop for each term returned from spotify
-/*	var query = req.query.query,
-		types = ["web","news","video","social","shopping"],
-		count = 10,
-		options = {};
-
-
-
-	async.each(types, function(type, cb) {
-		options.url = 'https://api.qwant.com/api/search/' + type + '?count=' + count + '&locale=en_gb&offset=10&q=' + query;
-		request(options, function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				var mammoth = JSON.parse(body);
-				obj[type] = mammoth.data.result.items;
-			}
-			cb();
-		});
-
-	}, function(err){
-	// if any of the processing produced an error, err would equal that error
-		if(err) {
-			// One of the iterations produced an error.
-			// All processing will now stop.
-			console.log('A request failed to process');
-		} else {
-			console.log('All requests have been processed successfully');
-			templateTags.results = obj;
-			console.log("templateTags");
-			console.log(templateTags);
-		}
-	});
-*/
 });
 
+function detectMostPopularArtists(popularArtists, numberOfArtists) {
+	var winners = new Array(numberOfArtists);
+
+	for (var artist in popularArtists) {
+		if (popularArtists.hasOwnProperty(artist)) {
+			for (var i = 0; i < winners.length; i++) {
+				var currentWinnerTotal = winners[i];
+				if(currentWinnerTotal) {
+						if(popularArtists[artist] > currentWinnerTotal.total){
+							console.log(artist + "|" + popularArtists[artist] + " is bigger than " + currentWinnerTotal.name + "|" + currentWinnerTotal.total)
+							winners[i] = { name: artist, total: popularArtists[artist] };
+							break;
+						}
+				}
+				else {
+					console.log("storing " + artist + "|" + popularArtists[artist] + " in pos " + i)
+					winners[i] = { name: artist, total: popularArtists[artist] };
+					break;
+				}
+			}
+		}
+	}
+
+	console.log("Detected winners:")
+	console.log(winners);
+
+	var results = [];
+	for(var i = 0; i < winners.length; i++) {
+		var winner = winners[i];
+		if(winner){
+			results.push(winner.name);
+		}
+	}
+	console.log("Detected results:")
+	console.log(results);
+
+	return results;
+}
+
 function performSearchForTerm(searchTerm, types, megaCallback) {
-		var count = 10,
+		var count = 5,
 			result = {};
 
 		async.each(types, function(type, cb) {
@@ -203,11 +214,11 @@ function fetchTermsForUser(user, megaCallback) {
 			if(err) {
 				console.log("[fetchTermsForUser] Error \n" + err)
 			}
-			else { //TODO: -----------------------------------------------------------------
-				console.log(totals); //TODO: -----------------------------------------------------------------
-				console.log("Yay, search complete. Passing onto megaCallback"); //TODO: -----------------------------------------------------------------
-				megaCallback(null, ['test', 'test2']); //TODO: -----------------------------------------------------------------
-			} //TODO: -----------------------------------------------------------------
+			else {
+				console.log(totals);
+				console.log("Yay, search complete. Passing onto megaCallback");
+				megaCallback(null, totals);
+			}
 		});
 }
 
