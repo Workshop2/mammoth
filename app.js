@@ -62,7 +62,7 @@ app.use(session({ secret: 'mammoth ftw' }));
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use('/', routes);
+app.use('/home', ensureAuthenticated, routes);
 app.use('/users', ensureAuthenticated, users);
 app.use('/results', ensureAuthenticated, results);
 
@@ -85,12 +85,16 @@ app.get('/login',
 app.get('/callback',
   passport.authenticate('spotify', { failureRedirect: '/failedToLogin' }),
   function(req, res) {
-    res.redirect('/');
+    res.redirect('/home');
   });
+
+app.get('/', function(req, res){
+  res.redirect('/home');
+});
 
 app.get('/logout', function(req, res){
   req.logout();
-  res.redirect('/');
+  res.redirect('/home');
 });
 
 
