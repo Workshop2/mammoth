@@ -63,8 +63,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/', routes);
-app.use('/users',ensureAuthenticated, users);
-app.use('/results', results);
+app.use('/users', ensureAuthenticated, users);
+app.use('/results', ensureAuthenticated, results);
 
 
 // GET /auth/spotify
@@ -73,7 +73,7 @@ app.use('/results', results);
 //   the user to spotify.com. After authorization, spotify will redirect the user
 //   back to this application at /auth/spotify/callback
 app.get('/login',
-  passport.authenticate('spotify', {scope: ['user-read-email', 'user-read-private'], showDialog: false}),
+  passport.authenticate('spotify', {scope: ['user-read-email', 'user-read-private', 'playlist-read-private', 'user-library-read'], showDialog: false}),
   function(req, res) { } // The request will be redirected to spotify for authentication, so this function will not be called.
 );
 
