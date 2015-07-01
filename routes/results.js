@@ -8,11 +8,13 @@ var SpotifyWebApi = require('spotify-web-api-node');
 
 /* GET results */
 router.get('/', function(req, res, next) {
-	var templateTags = {
-			title: 'Mmth_Music results'
-		},
-		obj = {};
-
+	var types = ["web","news","video","social","shopping"],
+			sortableTypes = ["news", "social", "videos"],
+			numberOfArtists = 5,
+			templateTags = {
+				title: 'Mmth_Music results',
+				results: {}
+		};
 	if(req.user){
 		var encodedDefault = encodeURIComponent("http://localhost:3000/images/mammoth-icon-white.png");
 		templateTags.username = req.user.username;
@@ -20,50 +22,163 @@ router.get('/', function(req, res, next) {
 		templateTags.gravatar = gravatar.url(req.user._json.email, {s: '200', r: 'pg', d: encodedDefault}, true);
 	}
 
-	//TODO: Change to use promise for the response
-	fetchTermsForUser(req.user);
+	// init with blank arrays
+	for(var i = 0; i < types.length; i++) {
+		templateTags.results[types[i]] = [];
+	}
 
-	// TODO: Loop for each term returned from spotify
-	var query = req.query.query,
-		types = ["web","news","videos","social","shopping"],
-		count = 10,
-		options = {};
+	async.waterfall([
 
+		// Perform the Spotify query for all valid terms
+		function(callback) {
+			console.log("Getting Spotify terms...");
+			fetchTermsForUser(req.user, callback);
+		},
 
+		// Now order the popular artists
+		function(artists, callback) {
+			console.log("Detecting most popular artists...");
+			var popularArtists = detectMostPopularArtists(artists, numberOfArtists);
+			callback(null, popularArtists);
 
+		},
 
-	async.each(types, function(type, cb) {
-		if(type=="videos")options.url = 'https://api.qwant.com/api/search/' + type + '?count=' + "4" + "&f=source%3Ayoutube" + '&locale=en_gb&offset=10&q=' + query;
-		else options.url = 'https://api.qwant.com/api/search/' + type + '?count=' + count + '&locale=en_gb&offset=10&q=' + query;
-		
-		console.log(options.url);
-		request(options, function (error, response, body) {
-			var mammoth = JSON.parse(body);
-			if (!error && response.statusCode == 200 && typeof mammoth.data!=="undefined") {
-				obj[type] = mammoth.data.result.items;
+		// Now loop all of the terms and do a search under each "search type" e.g. news
+		function(searchTerms, callback) {
+			console.log("Performing searches for Spotify Search Terms...");
+			var query = req.query.query; //TODO: Move this up
+			searchTerms = query ? [query] : searchTerms;
+
+			async.each(searchTerms, function(searchTerm, cb) {
+					console.log("Performing search for " + searchTerm);
+					performSearchForTerm(searchTerm, types, function(searchResults) {
+						console.log("Got some results for " + searchTerm);
+						//console.log(searchResults);
+						// with the given result, now collate into one large results obj
+						for(var typeI = 0; typeI < types.length; typeI++) {
+							var type = types[typeI];
+							//console.log(searchResults);
+							var currentResults = searchResults[type]; // array of result for type e.g. news
+
+							console.log("Building mega results for  " + type);
+							// loop round all results and push them onto the big results stack
+							// keeping the grouping
+							for (var i = 0; i < currentResults.length; i++) {
+								var result = currentResults[i];
+								templateTags.results[type].push(result);
+								console.log("Pusing result onto " + type);
+								console.log(result);
+							}
+						}
+
+						console.log("Moving onto next search term");
+						cb(null);
+					});
+
+			},
+			function(err) {
+				console.log("Finished looping each search term")
+
+				if(err) {
+					console.log("NOOOO")
+				}
+				else {
+					console.log("So close now...")
+					callback(null);
+				}
+			});
+		},
+
+		// Sort relevant result types
+		function(callback) {
+			console.log("Sorting results...");
+
+			for (var i = 0; i < sortableTypes.length; i++) {
+				var type = sortableTypes[i];
+
+				console.log("Sorting type " + type);
+
+				if(templateTags.results[type]) {
+					templateTags.results[type] = templateTags.results[type].sort(function(a, b){ return b.date - a.date;})
+				}
 			}
-			cb();
-		});
 
-	}, function(err){
-	// if any of the processing produced an error, err would equal that error
-		if(err) {
-			// One of the iterations produced an error.
-			// All processing will now stop.
-			console.log('A request failed to process');
-		} else {
-			console.log('All requests have been processed successfully');
-			templateTags.results = obj;
-			console.log("templateTags");
-			console.log(templateTags);
-			res.render('results', templateTags);
+			callback(null);
+		},
+
+		// Now render out the results
+		function(callback) {
+				console.log("YAY - we made it to the end");
+				//console.log(templateTags);
+				// finish by writing the response out
+				res.render('results', templateTags);
 		}
-	});
-
+	]);
 });
 
+function detectMostPopularArtists(popularArtists, maxNumberOfArtists) {
+	var toSort = [];
+
+	for (var artist in popularArtists) {
+		if (popularArtists.hasOwnProperty(artist)) {
+			toSort.push({ name: artist, total: popularArtists[artist] });
+		}
+	}
+
+	toSort = toSort.sort(function(a, b){
+	  return b.total - a.total;
+	});
+
+	var results = [];
+	for(var i = 0; i < Math.min(maxNumberOfArtists, toSort.length); i++) {
+		var obj = toSort[i];
+		if(obj){
+			results.push(obj.name);
+		}
+	}
+
+	return results;
+}
+
+function performSearchForTerm(searchTerm, types, megaCallback) {
+		var count = 5,
+			result = {};
+
+		async.each(types, function(type, cb) {
+			var options = {};
+			if(type=="videos")options.url = 'https://api.qwant.com/api/search/' + type + '?count=' + "4" + "&f=source%3Ayoutube" + '&locale=en_gb&offset=10&q=' + searchTerm;
+			else options.url = 'https://api.qwant.com/api/search/' + type + '?count=' + count + '&locale=en_gb&offset=10&q=' + searchTerm;
+
+			result[type] = []; // we are always exprected to return each type
+			request(options, function (error, response, body) {
+				var mammoth = JSON.parse(body);
+				console.log("-- Calling QWANT " + searchTerm + " " + type);
+				if (!error && response.statusCode == 200 && typeof mammoth.data!=="undefined") {
+					result[type] = mammoth.data.result.items;
+				}
+				console.log("-- Called QWANT " + searchTerm + " " + type);
+
+				console.log("-- Moving on " + searchTerm + " " + type);
+				cb(null);
+			});
+		},
+		function(err){
+			console.log("--- Finishing searches " + searchTerm);
+			// if any of the processing produced an error, err would equal that error
+			if(err) {
+				// One of the iterations produced an error.
+				// All processing will now stop.
+				console.log('[performSearchForTerm] A request failed to process\n' + err);
+			} else {
+				console.log("----- DONE " + searchTerm);
+				//console.log(result);
+				megaCallback(result);
+			}
+		});
+}
+
 //Zomg, this got complicated quickly....IM SO SORRY
-function fetchTermsForUser(user) {
+function fetchTermsForUser(user, megaCallback) {
 	var spotifyApi = new SpotifyWebApi();
 	spotifyApi.setAccessToken(user.accessToken);
 	var totals = {};
@@ -72,7 +187,7 @@ function fetchTermsForUser(user) {
 	var currentIteration = 0;
 	var finished = false;
 
-	async.whilst(
+	return async.whilst(
     function() { return !finished; },
     function(callback) {
         spotifyApi.getMySavedTracks({
@@ -110,7 +225,14 @@ function fetchTermsForUser(user) {
             });
     },
 		function(err) {
+			if(err) {
+				console.log("[fetchTermsForUser] Error \n" + err)
+			}
+			else {
 				console.log(totals);
+				console.log("Yay, search complete. Passing onto megaCallback");
+				megaCallback(null, totals);
+			}
 		});
 }
 
