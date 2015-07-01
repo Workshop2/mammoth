@@ -27,7 +27,7 @@ router.get('/', function(req, res, next) {
 		},
 			function(artists, callback) {
 				console.log("Detecting most popular artists...");
-				var popularArtists = detectMostPopularArtists(artists);
+				var popularArtists = detectMostPopularArtists(artists, numberOfArtists);
 				callback(null, popularArtists);
 			},
 		function(searchTerms, callback) {
@@ -46,7 +46,7 @@ router.get('/', function(req, res, next) {
 									// with the given result, now collate into one large results obj
 									for(var typeI = 0; typeI < types.length; typeI++) {
 										var type = types[typeI];
-										console.log(searchResults);
+										//console.log(searchResults);
 										var currentResults = searchResults[type]; // array of result for type e.g. news
 
 										console.log("Building mega results for  " + type);
@@ -88,15 +88,46 @@ router.get('/', function(req, res, next) {
 });
 
 function detectMostPopularArtists(popularArtists, numberOfArtists) {
-	var artistsToSearch = new Array(numberOfArtists);
+	var winners = new Array(numberOfArtists);
 
+	for (var artist in popularArtists) {
+		if (popularArtists.hasOwnProperty(artist)) {
+			for (var i = 0; i < winners.length; i++) {
+				var currentWinnerTotal = winners[i];
+				if(currentWinnerTotal) {
+						if(popularArtists[artist] > currentWinnerTotal.total){
+							console.log(artist + "|" + popularArtists[artist] + " is bigger than " + currentWinnerTotal.name + "|" + currentWinnerTotal.total)
+							winners[i] = { name: artist, total: popularArtists[artist] };
+							break;
+						}
+				}
+				else {
+					console.log("storing " + artist + "|" + popularArtists[artist] + " in pos " + i)
+					winners[i] = { name: artist, total: popularArtists[artist] };
+					break;
+				}
+			}
+		}
+	}
 
+	console.log("Detected winners:")
+	//console.log(winners);
 
-	return artistsToSearch;
+	var results = [];
+	for(var i = 0; i < winners.length; i++) {
+		var winner = winners[i];
+		if(winner){
+			results.push(winner.name);
+		}
+	}
+	console.log("Detected results:")
+	//console.log(results);
+
+	return results;
 }
 
 function performSearchForTerm(searchTerm, types, megaCallback) {
-		var count = 10,
+		var count = 5,
 			result = {};
 
 		async.each(types, function(type, cb) {
@@ -126,7 +157,7 @@ function performSearchForTerm(searchTerm, types, megaCallback) {
 				console.log('[performSearchForTerm] A request failed to process\n' + err);
 			} else {
 				console.log("----- DONE " + searchTerm);
-				console.log(result);
+				//console.log(result);
 				megaCallback(result);
 			}
 		});
