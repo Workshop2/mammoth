@@ -8,7 +8,7 @@ var SpotifyWebApi = require('spotify-web-api-node');
 
 /* GET results */
 router.get('/', function(req, res, next) {
-	var types = ["web","news","video","social","shopping"],
+	var types = ["web","news","videos","social","shopping"],
 			sortableTypes = ["news", "social", "videos"],
 			numberOfArtists = 5,
 			templateTags = {
