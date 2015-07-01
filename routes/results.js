@@ -3,7 +3,9 @@ var express = require('express');
 var async = require('async');
 var request = require('request');
 var router = express.Router();
+var gravatar = require('gravatar');
 var SpotifyWebApi = require('spotify-web-api-node');
+var querystring = require("querystring");
 
 /* GET results */
 router.get('/', function(req, res, next) {
@@ -12,9 +14,15 @@ router.get('/', function(req, res, next) {
 			typeLimits = [{ name: "videos", limit: 4 }],
 			numberOfArtists = 5,
 			templateTags = {
-				title: 'Mammoth results',
+				title: 'Mmth_Music results',
 				results: {}
 		};
+	if(req.user){
+		var encodedDefault = encodeURIComponent("http://localhost:3000/images/mammoth-icon-white.png");
+		templateTags.username = req.user.username;
+		if(req.user._json.email=="nigelflc@clocked0ne.co.uk")req.user._json.email="webdevelopment@clocked0ne.co.uk";
+		templateTags.gravatar = gravatar.url(req.user._json.email, {s: '200', r: 'pg', d: encodedDefault}, true);
+	}
 
 	// init with blank arrays
 	for(var i = 0; i < types.length; i++) {
@@ -34,6 +42,7 @@ router.get('/', function(req, res, next) {
 			console.log("Detecting most popular artists...");
 			var popularArtists = detectMostPopularArtists(artists, numberOfArtists);
 			callback(null, popularArtists);
+
 		},
 
 		// Now loop all of the terms and do a search under each "search type" e.g. news
@@ -47,7 +56,6 @@ router.get('/', function(req, res, next) {
 					performSearchForTerm(searchTerm, types, function(searchResults) {
 						console.log("Got some results for " + searchTerm);
 						//console.log(searchResults);
-
 						// with the given result, now collate into one large results obj
 						for(var typeI = 0; typeI < types.length; typeI++) {
 							var type = types[typeI];
@@ -111,9 +119,9 @@ router.get('/', function(req, res, next) {
 
 				console.log("Before: " + elements.length);
 				if(elements) {
-					templateTags.results[type.name] = elements.splice(Math.min(elements.length, type.limit), Number.MAX_VALUE);
+					elements.splice(Math.min(elements.length, type.limit), Number.MAX_VALUE);
 				}
-				console.log("After: " + elements.length);
+				console.log("After: " + templateTags.results[type.name].length);
 			}
 
 			callback(null);
@@ -158,15 +166,27 @@ function performSearchForTerm(searchTerm, types, megaCallback) {
 			result = {};
 
 		async.each(types, function(type, cb) {
+			var urlOptions = {
+				count: count,
+				locale: "en_gb",
+				q: searchTerm
+			};
+
+			if(type == "videos") {
+				urlOptions.count = 4;
+				urlOptions.f = "source-youtube";
+			}
+
 			var options = {
-				url: 'https://api.qwant.com/api/search/' + type + '?count=' + count + '&locale=en_gb&offset=10&q=' + searchTerm
+				url: 'https://api.qwant.com/api/search/' + type + '?' + querystring.stringify(urlOptions)
 			};
 
 			result[type] = []; // we are always exprected to return each type
 			request(options, function (error, response, body) {
-				//console.log("-- Calling QWANT " + searchTerm + " " + type);
-				if (!error && response.statusCode == 200) {
-					var mammoth = JSON.parse(body);
+				console.log("URL: " + options.url);
+				var mammoth = JSON.parse(body);
+				console.log("-- Calling QWANT " + searchTerm + " " + type);
+				if (!error && response.statusCode == 200 && typeof mammoth.data!=="undefined") {
 					result[type] = mammoth.data.result.items;
 				}
 				//console.log("-- Called QWANT " + searchTerm + " " + type);
