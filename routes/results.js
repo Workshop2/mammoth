@@ -9,9 +9,14 @@ var querystring = require("querystring");
 
 /* GET results */
 router.get('/', function(req, res, next) {
-	var types = ["web","news","videos","social","shopping"],
+	var types = ["news","videos","social","shopping"],
 			sortableTypes = ["news", "social", "videos"],
-			typeLimits = [{ name: "videos", limit: 4 }],
+			typeLimits = [
+				{ name: "news", limit: 20 },
+				{ name: "social", limit: 20 },
+				{ name: "shopping", limit: 20 },
+				{ name: "videos", limit: 4 }
+			],
 			numberOfArtists = 5,
 			templateTags = {
 				title: 'Mmth_Music results',
