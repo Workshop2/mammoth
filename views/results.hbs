@@ -1,10 +1,11 @@
-<nav>
-  <a href="#" data-activates="slide-out" class="button-collapse show-on-large"><i class="mdi-navigation-menu"></i></a>
-  <ul class="left hide-on-med-and-down">
-  <li><a href="#!">Logo</a></li>
+<div class="results">
+  <!-- <a href="#" data-activates="slide-out" class="button-collapse show-on-large"><i class="mdi-navigation-menu"></i></a> -->
   <div class="row">
+    <div class="input-field col s1">
+      <a href="/" title="{{title}}"><img src="/images/mammoth-icon.png" alt="{{title}}" style="width:50px;height:auto;margin-top:6px;"></a>
+    </div>
     <form action="/results">
-      <div class="input-field col s10">
+      <div class="input-field col s9">
         <i class="material-icons prefix white-text">search</i>
         <input placeholder="Search&hellip;" id="query" name="query" type="search">
         <!-- <label for="query">Search</label> -->
@@ -12,16 +13,40 @@
       <div class="input-field col s2" style="padding-left:4rem"><button class="waves-effect waves-light btn-large grey darken-4">Search</button></div>
     </form>
   </div>
-  </ul>
-  <ul id="slide-out" class="side-nav grey darken-4">
+  <ul id="side-nav" class="side-nav fixed grey darken-4">
+  {{#if gravatar}}<div class="center-align section"><img class="circle" src="{{gravatar}}" alt="{{username}}"><br><h5 class="white-text">{{username}}</h5></div>{{/if}}
   <li><a href="#!" class="white-text">First Sidebar Link</a></li>
   <li><a href="#!" class="white-text">Second Sidebar Link</a></li>
   </ul>
-</nav>
+</div>
 
 <div class="grey lighten-4">
 
-  <h1>{{title}}</h1>
+  <h1 class="center-align">{{title}}</h1>
+
+{{#if results.videos}}
+  <div class="row">
+      <h2>Videos</h2>
+      <div class="row">
+        {{#each results.videos}}
+        <div class="col s12 m6 l6">
+          <div class="card">
+              <iframe width="320" height="239" src="{{media}}" frameborder="0" allowfullscreen></iframe>
+            <div class="right" style="width:60%;">
+              <div class="card-content">
+                <p>{{{desc}}}</p>
+              </div>
+              <div class="card-action">
+                <a href="{{url}}" title="{{title}}">{{title}}</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+  </div>
+{{/if}}
 
   <div class="row">
   {{#if results.news}}

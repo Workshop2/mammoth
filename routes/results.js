@@ -3,31 +3,43 @@ var express = require('express');
 var async = require('async');
 var request = require('request');
 var router = express.Router();
+var gravatar = require('gravatar');
 var SpotifyWebApi = require('spotify-web-api-node');
 
 /* GET results */
 router.get('/', function(req, res, next) {
 	var templateTags = {
-			title: 'Mammoth results'
+			title: 'Mmth_Music results'
 		},
 		obj = {};
+
+	if(req.user){
+		var encodedDefault = encodeURIComponent("http://localhost:3000/images/mammoth-icon-white.png");
+		templateTags.username = req.user.username;
+		if(req.user._json.email=="nigelflc@clocked0ne.co.uk")req.user._json.email="webdevelopment@clocked0ne.co.uk";
+		templateTags.gravatar = gravatar.url(req.user._json.email, {s: '200', r: 'pg', d: encodedDefault}, true);
+	}
 
 	//TODO: Change to use promise for the response
 	fetchTermsForUser(req.user);
 
 	// TODO: Loop for each term returned from spotify
 	var query = req.query.query,
-		types = ["web","news","video","social","shopping"],
+		types = ["web","news","videos","social","shopping"],
 		count = 10,
 		options = {};
 
 
 
+
 	async.each(types, function(type, cb) {
-		options.url = 'https://api.qwant.com/api/search/' + type + '?count=' + count + '&locale=en_gb&offset=10&q=' + query;
+		if(type=="videos")options.url = 'https://api.qwant.com/api/search/' + type + '?count=' + "4" + "&f=source%3Ayoutube" + '&locale=en_gb&offset=10&q=' + query;
+		else options.url = 'https://api.qwant.com/api/search/' + type + '?count=' + count + '&locale=en_gb&offset=10&q=' + query;
+		
+		console.log(options.url);
 		request(options, function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				var mammoth = JSON.parse(body);
+			var mammoth = JSON.parse(body);
+			if (!error && response.statusCode == 200 && typeof mammoth.data!=="undefined") {
 				obj[type] = mammoth.data.result.items;
 			}
 			cb();
