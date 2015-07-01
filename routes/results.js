@@ -95,14 +95,10 @@ function detectMostPopularArtists(popularArtists, maxNumberOfArtists) {
 			toSort.push({ name: artist, total: popularArtists[artist] });
 		}
 	}
-	console.log("ToSort 1:")
-	console.log(toSort);
 
 	toSort = toSort.sort(function(a, b){
 	  return b.total - a.total;
 	});
-	console.log("ToSort 2:")
-	console.log(toSort);
 
 	var results = [];
 	for(var i = 0; i < Math.min(maxNumberOfArtists, toSort.length); i++) {
@@ -112,46 +108,8 @@ function detectMostPopularArtists(popularArtists, maxNumberOfArtists) {
 		}
 	}
 
-	console.log("Detected results:")
-	console.log(results);
 	return results;
 }
-/*
-	for (var artist in popularArtists) {
-		if (popularArtists.hasOwnProperty(artist)) {
-			for (var i = 0; i < winners.length; i++) {
-				var currentWinnerTotal = winners[i];
-				if(currentWinnerTotal) {
-						if(popularArtists[artist] > currentWinnerTotal.total){
-							console.log(artist + "|" + popularArtists[artist] + " is bigger than " + currentWinnerTotal.name + "|" + currentWinnerTotal.total)
-							winners[i] =
-							break;
-						}
-				}
-				else {
-					console.log("storing " + artist + "|" + popularArtists[artist] + " in pos " + i)
-					winners[i] = ;
-					break;
-				}
-			}
-		}
-	}
-
-	console.log("Detected winners:")
-	//console.log(winners);
-
-	var results = [];
-	for(var i = 0; i < winners.length; i++) {
-		var winner = winners[i];
-		if(winner){
-			results.push(winner.name);
-		}
-	}
-	console.log("Detected results:")
-	//console.log(results);
-	*/
-
-//}
 
 function performSearchForTerm(searchTerm, types, megaCallback) {
 		var count = 5,
