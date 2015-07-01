@@ -8,11 +8,15 @@ router.get('/', function(req, res, next) {
 		title: 'Mmth_Music',
 		bodyclass: ' class=homepage'
 	};
+	console.log(req.user);
 	if(req.user){
 		var encodedDefault = encodeURIComponent("http://localhost:3000/public/images/mammoth-icon-white.png");
 		templateTags.username = req.user.username;
 		if(req.user._json.email=="nigelflc@clocked0ne.co.uk")req.user._json.email="webdevelopment@clocked0ne.co.uk";
 		templateTags.gravatar = gravatar.url(req.user._json.email, {s: '200', r: 'pg', d: encodedDefault}, true);
+		templateTags.followers = req.user.followers;
+		templateTags.product = req.user.product;
+		templateTags.profileUrl = req.user.profileUrl;
 	}
 	res.render('index', templateTags);
 });

@@ -34,12 +34,12 @@
         <div class="col s12 m6 l6">
           <div class="card">
               <iframe width="320" height="239" src="{{media}}" frameborder="0" allowfullscreen></iframe>
-            <div class="right" style="width:60%;">
+            <div class="right" style="width:50%;">
               <div class="card-content">
                 <p>{{{desc}}}</p>
               </div>
               <div class="card-action">
-                <a href="{{url}}" title="{{title}}">{{title}}</a>
+                <a href="{{url}}" title="{{title}}" target="_blank">{{title}}</a>
               </div>
             </div>
           </div>
@@ -58,9 +58,9 @@
       {{#each results.news}}
         <li class="collection-item avatar">
           <i class="material-icons medium circle">album</i>
-          <span class="title"><a href="{{url}}" title="{{title}}">{{title}}</a></span>
+          <span class="title"><a href="{{url}}" title="{{title}}" target="_blank">{{title}}</a></span>
           <p>{{desc}}</p>
-          <a href="#!" class="secondary-content"><i class="material-icons">grade</i></a>
+          <!-- <a href="#!" class="secondary-content"><i class="material-icons">grade</i></a> -->
         </li>
       {{/each}}
       </ul>
@@ -72,10 +72,10 @@
       <ul class="collection">
         {{#each results.social}}
           <li class="collection-item avatar">
-            <a href="{{userUrl}}" title="{{card}}"><img class="circle" src="{{img}}" alt="{{card}}"></a>
-            <span class="title"><a href="{{url}}" title="{{title}}">{{title}}</a></span>
+            <a href="{{userUrl}}" title="{{card}}" target="_blank"><img class="circle" src="{{img}}" alt="{{card}}"></a>
+            <span class="title"><a href="{{url}}" title="{{title}}" target="_blank">{{title}}</a></span>
             <p>{{{desc}}}</p>
-            <a href="#!" class="secondary-content"><i class="material-icons">grade</i></a>
+            <!-- <a href="#!" class="secondary-content"><i class="material-icons">grade</i></a> -->
           </li>
         {{/each}}
         </ul>
@@ -87,10 +87,10 @@
       <ul class="collection">
         {{#each results.shopping}}
           <li class="collection-item avatar">
-            <a href="{{url}}" title="{{title}}"><img class="circle" src="{{thumbnail}}" alt="{{title}}"></a>
-            <span class="title"><a href="{{url}}" title="{{title}}">{{title}}</a></span>
+            <a href="{{url}}" title="{{title}}" target="_blank"><img class="circle" src="{{thumbnail}}" alt="{{title}}"></a>
+            <span class="title"><a href="{{url}}" title="{{title}}" target="_blank">{{title}}</a></span>
             <p>{{desc}}<br><strong>&pound;{{priceInt}}</strong></p>
-            <a href="#!" class="secondary-content"><i class="material-icons">grade</i></a>
+            <!-- <a href="#!" class="secondary-content"><i class="material-icons">grade</i></a> -->
           </li>
         {{/each}}
         </ul>
