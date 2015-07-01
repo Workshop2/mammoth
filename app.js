@@ -28,6 +28,7 @@ passport.use(new SpotifyStrategy({
     callbackURL: 'http://localhost:3000/callback'
   },
   function(accessToken, refreshToken, profile, done) {
+    profile.accessToken = accessToken;
     process.nextTick(function () {
       return done(null, profile);
     });
@@ -62,7 +63,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/', routes);
-// app.use('/users',ensureAuthenticated, users);
+app.use('/users',ensureAuthenticated, users);
 app.use('/results', results);
 
 
