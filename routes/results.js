@@ -8,6 +8,7 @@ var SpotifyWebApi = require('spotify-web-api-node');
 /* GET results */
 router.get('/', function(req, res, next) {
 	var types = ["web","news","video","social","shopping"],
+			sortableTypes = ["news", "social", "videos"],
 			numberOfArtists = 5,
 			templateTags = {
 				title: 'Mammoth results',
@@ -20,66 +21,87 @@ router.get('/', function(req, res, next) {
 	}
 
 	async.waterfall([
+
+		// Perform the Spotify query for all valid terms
 		function(callback) {
 			console.log("Getting Spotify terms...");
-			// Perform the Spotify query for all valid terms
 			fetchTermsForUser(req.user, callback);
 		},
-			function(artists, callback) {
-				console.log("Detecting most popular artists...");
-				var popularArtists = detectMostPopularArtists(artists, numberOfArtists);
-				callback(null, popularArtists);
-			},
+
+		// Now order the popular artists
+		function(artists, callback) {
+			console.log("Detecting most popular artists...");
+			var popularArtists = detectMostPopularArtists(artists, numberOfArtists);
+			callback(null, popularArtists);
+		},
+
+		// Now loop all of the terms and do a search under each "search type" e.g. news
 		function(searchTerms, callback) {
 			console.log("Performing searches for Spotify Search Terms...");
-			var query = req.query.query;
+			var query = req.query.query; //TODO: Move this up
 			searchTerms = query ? [query] : searchTerms;
 
-			// Now loop all of the terms and do a search under each "search type" e.g. news
 			async.each(searchTerms, function(searchTerm, cb) {
+					console.log("Performing search for " + searchTerm);
+					performSearchForTerm(searchTerm, types, function(searchResults) {
+						console.log("Got some results for " + searchTerm);
+						//console.log(searchResults);
 
-								console.log("Performing search for " + searchTerm);
-								performSearchForTerm(searchTerm, types, function(searchResults) {
-									console.log("Got some results for " + searchTerm);
-									//console.log(searchResults);
+						// with the given result, now collate into one large results obj
+						for(var typeI = 0; typeI < types.length; typeI++) {
+							var type = types[typeI];
+							//console.log(searchResults);
+							var currentResults = searchResults[type]; // array of result for type e.g. news
 
-									// with the given result, now collate into one large results obj
-									for(var typeI = 0; typeI < types.length; typeI++) {
-										var type = types[typeI];
-										//console.log(searchResults);
-										var currentResults = searchResults[type]; // array of result for type e.g. news
+							console.log("Building mega results for  " + type);
+							// loop round all results and push them onto the big results stack
+							// keeping the grouping
+							for (var i = 0; i < currentResults.length; i++) {
+								var result = currentResults[i];
+								templateTags.results[type].push(result);
+								console.log("Pusing result onto " + type);
+								console.log(result);
+							}
+						}
 
-										console.log("Building mega results for  " + type);
-										// loop round all results and push them onto the big results stack
-										// keeping the grouping
-										for (var i = 0; i < currentResults.length; i++) {
-											var result = currentResults[i];
-											templateTags.results[type].push(result);
-											console.log("Pusing result onto " + type + "\n" + result);
-										}
-									}
-
-									console.log("Moving onto next search term");
-									cb(null);
-								});
+						console.log("Moving onto next search term");
+						cb(null);
+					});
 
 			},
 			function(err) {
 				console.log("Finished looping each search term")
 
 				if(err) {
-					console.log("FFS")
+					console.log("NOOOO")
 				}
 				else {
-					console.log("So fucking close now...")
-					callback(null); //TODO: We need some more async
+					console.log("So close now...")
+					callback(null);
 				}
 			});
-
 		},
+
+		// Sort relevant result types
+		function(callback) {
+			console.log("Sorting results...");
+
+			for (var i = 0; i < sortableTypes.length; i++) {
+				var type = sortableTypes[i];
+
+				console.log("Sorting type " + type);
+
+				if(templateTags.results[type]) {
+					templateTags.results[type] = templateTags.results[type].sort(function(a, b){ return b.date - a.date;})
+				}
+			}
+
+			callback(null);
+		},
+
+		// Now render out the results
 		function(callback) {
 				console.log("YAY - we made it to the end");
-				console.log("Rendering ");
 				//console.log(templateTags);
 				// finish by writing the response out
 				res.render('results', templateTags);
