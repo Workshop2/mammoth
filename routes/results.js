@@ -7,8 +7,9 @@ var SpotifyWebApi = require('spotify-web-api-node');
 
 /* GET results */
 router.get('/', function(req, res, next) {
-	var types = ["web","news","video","social","shopping"],
+	var types = ["web","news","videos","social","shopping"],
 			sortableTypes = ["news", "social", "videos"],
+			typeLimits = [{ name: "videos", limit: 4 }],
 			numberOfArtists = 5,
 			templateTags = {
 				title: 'Mammoth results',
@@ -59,8 +60,6 @@ router.get('/', function(req, res, next) {
 							for (var i = 0; i < currentResults.length; i++) {
 								var result = currentResults[i];
 								templateTags.results[type].push(result);
-								console.log("Pusing result onto " + type);
-								console.log(result);
 							}
 						}
 
@@ -94,6 +93,27 @@ router.get('/', function(req, res, next) {
 				if(templateTags.results[type]) {
 					templateTags.results[type] = templateTags.results[type].sort(function(a, b){ return b.date - a.date;})
 				}
+			}
+
+			callback(null);
+		},
+
+		// Strip unwanted content
+		function(callback) {
+			console.log("Stripping unwanted content...");
+
+			for (var i = 0; i < typeLimits.length; i++) {
+				var type = typeLimits[i];
+
+				console.log("For type " + type.name);
+
+				var elements = templateTags.results[type.name];
+
+				console.log("Before: " + elements.length);
+				if(elements) {
+					templateTags.results[type.name] = elements.splice(Math.min(elements.length, type.limit), Number.MAX_VALUE);
+				}
+				console.log("After: " + elements.length);
 			}
 
 			callback(null);
@@ -144,14 +164,14 @@ function performSearchForTerm(searchTerm, types, megaCallback) {
 
 			result[type] = []; // we are always exprected to return each type
 			request(options, function (error, response, body) {
-				console.log("-- Calling QWANT " + searchTerm + " " + type);
+				//console.log("-- Calling QWANT " + searchTerm + " " + type);
 				if (!error && response.statusCode == 200) {
 					var mammoth = JSON.parse(body);
 					result[type] = mammoth.data.result.items;
 				}
-				console.log("-- Called QWANT " + searchTerm + " " + type);
+				//console.log("-- Called QWANT " + searchTerm + " " + type);
 
-				console.log("-- Moving on " + searchTerm + " " + type);
+				//console.log("-- Moving on " + searchTerm + " " + type);
 				cb(null);
 			});
 		},
@@ -163,7 +183,7 @@ function performSearchForTerm(searchTerm, types, megaCallback) {
 				// All processing will now stop.
 				console.log('[performSearchForTerm] A request failed to process\n' + err);
 			} else {
-				console.log("----- DONE " + searchTerm);
+				//console.log("----- DONE " + searchTerm);
 				//console.log(result);
 				megaCallback(result);
 			}
@@ -208,7 +228,7 @@ function fetchTermsForUser(user, megaCallback) {
                     }
                 }
 
-								console.log("currentIteration" + currentIteration + "totalIterations" + totalIterations)
+								console.log("currentIteration: " + currentIteration + " | totalIterations: " + totalIterations)
 								finished = currentIteration >= totalIterations;
 								currentIteration++;
 		        		callback();
@@ -223,7 +243,7 @@ function fetchTermsForUser(user, megaCallback) {
 			}
 			else {
 				console.log(totals);
-				console.log("Yay, search complete. Passing onto megaCallback");
+				//console.log("Yay, search complete. Passing onto megaCallback");
 				megaCallback(null, totals);
 			}
 		});

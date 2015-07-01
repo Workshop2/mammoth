@@ -85,7 +85,7 @@ app.get('/login',
 app.get('/callback',
   passport.authenticate('spotify', { failureRedirect: '/failedToLogin' }),
   function(req, res) {
-    res.redirect('/');
+    res.redirect('/results');
   });
 
 app.get('/logout', function(req, res){
