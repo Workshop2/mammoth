@@ -87,9 +87,36 @@ router.get('/', function(req, res, next) {
 	]);
 });
 
-function detectMostPopularArtists(popularArtists, numberOfArtists) {
-	var winners = new Array(numberOfArtists);
+function detectMostPopularArtists(popularArtists, maxNumberOfArtists) {
+	var toSort = [];
 
+	for (var artist in popularArtists) {
+		if (popularArtists.hasOwnProperty(artist)) {
+			toSort.push({ name: artist, total: popularArtists[artist] });
+		}
+	}
+	console.log("ToSort 1:")
+	console.log(toSort);
+
+	toSort = toSort.sort(function(a, b){
+	  return b.total - a.total;
+	});
+	console.log("ToSort 2:")
+	console.log(toSort);
+
+	var results = [];
+	for(var i = 0; i < Math.min(maxNumberOfArtists, toSort.length); i++) {
+		var obj = toSort[i];
+		if(obj){
+			results.push(obj.name);
+		}
+	}
+
+	console.log("Detected results:")
+	console.log(results);
+	return results;
+}
+/*
 	for (var artist in popularArtists) {
 		if (popularArtists.hasOwnProperty(artist)) {
 			for (var i = 0; i < winners.length; i++) {
@@ -97,13 +124,13 @@ function detectMostPopularArtists(popularArtists, numberOfArtists) {
 				if(currentWinnerTotal) {
 						if(popularArtists[artist] > currentWinnerTotal.total){
 							console.log(artist + "|" + popularArtists[artist] + " is bigger than " + currentWinnerTotal.name + "|" + currentWinnerTotal.total)
-							winners[i] = { name: artist, total: popularArtists[artist] };
+							winners[i] =
 							break;
 						}
 				}
 				else {
 					console.log("storing " + artist + "|" + popularArtists[artist] + " in pos " + i)
-					winners[i] = { name: artist, total: popularArtists[artist] };
+					winners[i] = ;
 					break;
 				}
 			}
@@ -122,9 +149,9 @@ function detectMostPopularArtists(popularArtists, numberOfArtists) {
 	}
 	console.log("Detected results:")
 	//console.log(results);
+	*/
 
-	return results;
-}
+//}
 
 function performSearchForTerm(searchTerm, types, megaCallback) {
 		var count = 5,
