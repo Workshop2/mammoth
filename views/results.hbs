@@ -52,22 +52,25 @@
 
   <div class="row">
   {{#if results.news}}
-    <div id="newsBlock" class="col s12 m12 l4 scrollspy">
+    <div id="newsBlock" class="col s12 scrollspy">
       <h2>News</h2>
-      <ul class="collection">
+      <div class="row">
       {{#each results.news}}
-        <li class="collection-item avatar">
-          <i class="material-icons medium circle">album</i>
-          <span class="title"><a href="{{url}}" title="{{title}}" target="_blank">{{title}}</a></span>
-          <p>{{desc}}</p>
-          <!-- <a href="#!" class="secondary-content"><i class="material-icons">grade</i></a> -->
-        </li>
+      <div class="col s12 m6">
+        <div class="card">
+            <div class="card-content white-text">
+              <div class="left" style="margin-right:2rem"><i class="material-icons large circle black-text">album</i></div>
+              <span class="card-title"><a href="{{url}}" title="{{title}}" target="_blank">{{title}}</a></span>
+              <p class="black-text">{{desc}}</p>
+            </div>
+        </div>
+        </div>
       {{/each}}
-      </ul>
+      </div>
     </div>
   {{/if}}
   {{#if results.social}}
-    <div id="socialBlock" class="col s12 m12 l4 scrollspy">
+    <div id="socialBlock" class="col s12 scrollspy">
       <h2>Social</h2>
       <ul class="collection">
         {{#each results.social}}
@@ -82,7 +85,7 @@
     </div>
   {{/if}}
   {{#if results.shopping}}
-    <div id="shoppingBlock" class="col s12 m12 l4 scrollspy">
+    <div id="shoppingBlock" class="col s12 scrollspy">
       <h2>Shopping</h2>
       <ul class="collection">
         {{#each results.shopping}}

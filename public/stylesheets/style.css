@@ -13,3 +13,9 @@ nav{background:transparent;box-shadow:none;}
 iframe{margin:20px 0 15px 20px;}
 
 .results {background: transparent url(../images/background.jpg) no-repeat scroll center center; background-size:cover;}
+
+@media only screen and (max-width : 992px){
+	body {
+    padding-left: 0;
+	}
+}
