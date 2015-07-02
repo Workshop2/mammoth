@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var gravatar = require('gravatar');
+var config = require('../config/config');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -10,7 +11,7 @@ router.get('/', function(req, res, next) {
 	};
 	console.log(req.user);
 	if(req.user){
-		var encodedDefault = encodeURIComponent("http://localhost:3000/public/images/mammoth-icon-white.png");
+		var encodedDefault = encodeURIComponent(config.host + "/public/images/mammoth-icon-white.png");
 		templateTags.username = req.user.username;
 		if(req.user._json.email=="nigelflc@clocked0ne.co.uk")req.user._json.email="webdevelopment@clocked0ne.co.uk";
 		templateTags.gravatar = gravatar.url(req.user._json.email, {s: '200', r: 'pg', d: encodedDefault}, true);
