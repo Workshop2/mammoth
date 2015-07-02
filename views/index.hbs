@@ -17,17 +17,14 @@
 	<div class="center-align hometext">
 		<h1 class="white-text">{{title}}</h1>
 		<h5 class="white-text">If you want to get ahead, get {{title}}</h5>
+		<div class="section"><br><br><br>
+		<form action="/results">
+			<input name="query" type="hidden" value="">
+			<button class="waves-effect waves-light btn-large red"><i class="material-icons right">person_pin</i>Personalise</button>
+		</form>
+		</div>
 	</div>
 
-	<div class="row">
-		<form action="/results">
-			<div class="input-field col s10">
-				<i class="material-icons prefix white-text">search</i>
-				<input placeholder="Search&hellip;" id="query" name="query" type="search">
-				<!-- <label for="query">Search</label> -->
-			</div>
-			<div class="input-field col s2" style="padding-left:4rem"><button class="waves-effect waves-light btn-large grey darken-4">Search</button></div>
-		</form>
-	</div>
+	
 
 </div>

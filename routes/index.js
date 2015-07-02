@@ -11,7 +11,7 @@ router.get('/', function(req, res, next) {
 	};
 	console.log(req.user);
 	if(req.user){
-		var encodedDefault = encodeURIComponent(config.host + "/public/images/mammoth-icon-white.png");
+		var encodedDefault = encodeURIComponent(config.host + "https://apologetic-chesterfield-8212.herokuapp.com/images/mammoth-icon-white.png");
 		templateTags.username = req.user.username;
 		if(req.user._json.email=="nigelflc@clocked0ne.co.uk")req.user._json.email="webdevelopment@clocked0ne.co.uk";
 		templateTags.gravatar = gravatar.url(req.user._json.email, {s: '200', r: 'pg', d: encodedDefault}, true);

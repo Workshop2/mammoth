@@ -23,10 +23,13 @@ router.get('/', function(req, res, next) {
 				results: {}
 		};
 	if(req.user){
-		var encodedDefault = encodeURIComponent(config.host + "/images/mammoth-icon-white.png");
+		var encodedDefault = encodeURIComponent(config.host + "https://apologetic-chesterfield-8212.herokuapp.com/images/mammoth-icon-white.png");
 		templateTags.username = req.user.username;
 		if(req.user._json.email=="nigelflc@clocked0ne.co.uk")req.user._json.email="webdevelopment@clocked0ne.co.uk";
 		templateTags.gravatar = gravatar.url(req.user._json.email, {s: '200', r: 'pg', d: encodedDefault}, true);
+		templateTags.followers = req.user.followers;
+		templateTags.product = req.user.product;
+		templateTags.profileUrl = req.user.profileUrl;
 	}
 
 	// init with blank arrays
