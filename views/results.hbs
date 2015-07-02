@@ -98,4 +98,24 @@
   {{/if}}
   </div>
 
+
+
+  {{#if results.knowledge}}
+    <div id="videosBlock" class="row scrollspy" style="padding-left: 10px;">
+        <h2>Knowledge</h2>
+        <div class="row">
+          {{#each results.knowledge}}
+          <div class="col s12 m6 l6">
+            <div class="card">
+              {{{this}}}              
+            </div>
+          </div>
+          {{/each}}
+        </div>
+      </div>
+    </div>
+  {{/if}}
+
+
+
 </div>
