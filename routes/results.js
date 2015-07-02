@@ -9,7 +9,7 @@ var querystring = require("querystring");
 
 /* GET results */
 router.get('/', function(req, res, next) {
-	var types = ["news","videos","social","shopping", "knowledge"],
+	var types = ["news","videos","social","shopping"],
 			sortableTypes = ["news", "social", "videos"],
 			typeLimits = [
 				{ name: "news", limit: 6 },
